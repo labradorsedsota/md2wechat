@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公众号 Markdown 美化器</title>
+<style>
+/* ===== Reset & Base ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;font-size:14px;color:#333;background:#f0f0f0}
+
+/* ===== Layout ===== */
+.app{display:flex;flex-direction:column;height:100vh;min-width:1024px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;background:#fff;border-bottom:1px solid #e8e8e8;gap:12px;flex-shrink:0}
+.toolbar-left{display:flex;align-items:center;gap:12px}
+.toolbar-right{display:flex;align-items:center;gap:12px}
+.main{display:flex;flex:1;overflow:hidden}
+.editor-pane{flex:1;display:flex;flex-direction:column;border-right:1px solid #e8e8e8;background:#fafafa}
+.preview-pane{flex:1;display:flex;flex-direction:column;background:#e8e8e8;overflow-y:auto;padding:24px}
+.editor-pane textarea{flex:1;border:none;outline:none;resize:none;padding:20px;font-family:Menlo,Consolas,"Courier New",monospace;font-size:14px;line-height:1.6;color:#333;background:#fafafa;tab-size:4}
+.preview-wrapper{max-width:680px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:32px 28px;width:100%}
+.statusbar{display:flex;align-items:center;justify-content:space-between;padding:4px 20px;background:#fafafa;border-top:1px solid #e8e8e8;font-size:12px;color:#999;flex-shrink:0}
+
+/* ===== Toolbar Controls ===== */
+.toolbar label{font-size:13px;color:#666}
+.toolbar select{padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px;background:#fff;cursor:pointer;outline:none}
+.toolbar select:focus{border-color:#1890ff}
+.btn{padding:6px 16px;border:none;border-radius:4px;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-primary{background:#1890ff;color:#fff}
+.btn-primary:hover{background:#40a9ff}
+.btn-primary:active{background:#096dd9}
+.btn-icon{background:none;border:1px solid #d9d9d9;border-radius:4px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#666;transition:all .2s}
+.btn-icon:hover{border-color:#1890ff;color:#1890ff}
+.btn-icon.active{border-color:#1890ff;color:#1890ff;background:#e6f7ff}
+
+/* ===== Settings Panel ===== */
+.settings-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.15);z-index:100;display:none}
+.settings-overlay.show{display:block}
+.settings-panel{position:fixed;top:0;right:0;width:300px;height:100%;background:#fff;z-index:101;box-shadow:-2px 0 8px rgba(0,0,0,.1);transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+.settings-panel.show{transform:translateX(0)}
+.settings-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e8e8e8}
+.settings-header h3{font-size:15px;font-weight:600}
+.settings-close{background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:0;line-height:1}
+.settings-close:hover{color:#333}
+.settings-body{padding:20px;overflow-y:auto;flex:1}
+.setting-item{margin-bottom:20px}
+.setting-item label{display:block;font-size:13px;color:#666;margin-bottom:8px}
+.setting-item .range-row{display:flex;align-items:center;gap:8px}
+.setting-item input[type=range]{flex:1;accent-color:#1890ff}
+.setting-item .range-val{font-size:12px;color:#999;min-width:40px;text-align:right}
+.setting-item input[type=color]{width:40px;height:30px;border:1px solid #d9d9d9;border-radius:4px;cursor:pointer;padding:2px}
+
+/* ===== Toast ===== */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:#333;color:#fff;padding:8px 24px;border-radius:4px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:200}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== Copy Success Animation ===== */
+.copy-ok .btn-primary{background:#52c41a !important}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span style="font-size:15px;font-weight:600;color:#333">📝 公众号 Markdown 美化器</span>
+      <label>主题
+        <select id="themeSelect">
+          <option value="minimal">简约</option>
+          <option value="tech">科技</option>
+          <option value="literary">文艺</option>
+        </select>
+      </label>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn-icon" id="settingsBtn" title="样式微调">⚙</button>
+      <button class="btn btn-primary" id="copyBtn">📋 复制</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="editor-pane">
+      <textarea id="editor" spellcheck="false" placeholder="在此输入 Markdown..."></textarea>
+    </div>
+    <div class="preview-pane" id="previewPane">
+      <div class="preview-wrapper" id="preview"></div>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="statusbar">
+    <span id="charCount">0 字</span>
+    <span id="themeName">主题：简约</span>
+    <span id="storageStatus">存储：就绪</span>
+  </div>
+</div>
+
+<!-- Settings Panel -->
+<div class="settings-overlay" id="settingsOverlay"></div>
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <h3>样式微调</h3>
+    <button class="settings-close" id="settingsClose">&times;</button>
+  </div>
+  <div class="settings-body">
+    <div class="setting-item">
+      <label>正文字号</label>
+      <div class="range-row">
+        <input type="range" id="fontSize" min="14" max="18" step="1" value="16">
+        <span class="range-val" id="fontSizeVal">16px</span>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label>行间距</label>
+      <div class="range-row">
+        <input type="range" id="lineHeight" min="1.5" max="2.5" step="0.05" value="1.75">
+        <span class="range-val" id="lineHeightVal">1.75</span>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label>主题色</label>
+      <input type="color" id="themeColor" value="#1890ff">
+    </div>
+    <div class="setting-item">
+      <label>代码块配色</label>
+      <select id="codeTheme" style="width:100%;padding:6px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px">
+        <option value="light">浅色</option>
+        <option value="dark">深色</option>
+        <option value="monokai">Monokai</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================================================================
+// Markdown Parser — lightweight, zero-dependency
+// ===================================================================
+(function(){
+'use strict';
+
+// ----- Syntax Highlighter -----
+var HL_KEYWORDS = {
+  js: /\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|this|class|extends|import|export|default|from|async|await|try|catch|throw|typeof|instanceof|in|of|null|undefined|true|false|void|delete|yield)\b/g,
+  python: /\b(def|class|return|if|elif|else|for|while|import|from|as|try|except|finally|raise|with|yield|lambda|pass|break|continue|and|or|not|in|is|None|True|False|self|print|global|nonlocal|async|await)\b/g,
+  html: /\b(html|head|body|div|span|p|a|img|ul|ol|li|table|tr|td|th|h[1-6]|script|style|link|meta|form|input|button|select|option|textarea)\b/g,
+  css: /\b(color|background|margin|padding|border|font|display|position|width|height|flex|grid|align|justify|overflow|opacity|transition|transform|animation|z-index|top|left|right|bottom|none|auto|inherit|solid|block|inline|absolute|relative|fixed|center)\b/g,
+  json: null
+};
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function highlightCode(code, lang){
+  lang = (lang||'').toLowerCase().replace(/^javascript$/,'js').replace(/^py$/,'python');
+  var h = escHtml(code);
+
+  // strings
+  h = h.replace(/(["'`])(?:(?!\1|\\).|\\.)*?\1/g, function(m){return '<span style="color:#e6db74">'+m+'</span>'});
+  // comments
+  h = h.replace(/(\/\/.*$)/gm, function(m){return '<span style="color:#75715e">'+m+'</span>'});
+  h = h.replace(/(#[^\n<]*)/g, function(m){
+    if(lang==='css') return m;
+    return '<span style="color:#75715e">'+m+'</span>';
+  });
+  // numbers
+  h = h.replace(/\b(\d+\.?\d*)\b/g, '<span style="color:#ae81ff">$1</span>');
+  // keywords
+  var kw = HL_KEYWORDS[lang];
+  if(kw){
+    h = h.replace(kw, function(m){return '<span style="color:#f92672;font-weight:bold">'+m+'</span>'});
+  }
+  return h;
+}
+
+// ----- Themes -----
+var THEMES = {
+  minimal: {
+    name:'简约',
+    h1Color:'#000', h2Color:'#333', h3Color:'#555',
+    textColor:'#333', linkColor:'#576b95',
+    quoteBg:'#f7f7f7', quoteBorder:'#ddd', quoteColor:'#666',
+    codeBg:'#f6f8fa', codeColor:'#333', codeBorder:'#e1e4e8',
+    tableBorderColor:'#ddd', tableHeaderBg:'#f6f8fa', tableStripeBg:'#fafafa',
+    hrColor:'#eee'
+  },
+  tech: {
+    name:'科技',
+    h1Color:'#0d47a1', h2Color:'#1565c0', h3Color:'#1976d2',
+    textColor:'#37474f', linkColor:'#1890ff',
+    quoteBg:'#e3f2fd', quoteBorder:'#1890ff', quoteColor:'#37474f',
+    codeBg:'#263238', codeColor:'#eeffff', codeBorder:'#37474f',
+    tableBorderColor:'#b0bec5', tableHeaderBg:'#e3f2fd', tableStripeBg:'#f5f5f5',
+    hrColor:'#b0bec5'
+  },
+  literary: {
+    name:'文艺',
+    h1Color:'#5d4037', h2Color:'#6d4c41', h3Color:'#795548',
+    textColor:'#4e342e', linkColor:'#8d6e63',
+    quoteBg:'#fbe9e7', quoteBorder:'#d7ccc8', quoteColor:'#5d4037',
+    codeBg:'#efebe9', codeColor:'#4e342e', codeBorder:'#d7ccc8',
+    tableBorderColor:'#d7ccc8', tableHeaderBg:'#efebe9', tableStripeBg:'#fafaf8',
+    hrColor:'#d7ccc8'
+  }
+};
+
+// ----- Code block themes -----
+var CODE_THEMES = {
+  light: {bg:'#f6f8fa', color:'#333', border:'#e1e4e8'},
+  dark: {bg:'#282c34', color:'#abb2bf', border:'#3e4451'},
+  monokai: {bg:'#272822', color:'#f8f8f2', border:'#49483e'}
+};
+
+// ----- State -----
+var state = {
+  theme:'minimal',
+  fontSize:16,
+  lineHeight:1.75,
+  themeColor:'#1890ff',
+  codeTheme:'light',
+  content:''
+};
+
+// Load from localStorage
+try {
+  var saved = JSON.parse(localStorage.getItem('m2w_state'));
+  if(saved){
+    if(saved.theme && THEMES[saved.theme]) state.theme = saved.theme;
+    if(saved.fontSize>=14 && saved.fontSize<=18) state.fontSize = saved.fontSize;
+    if(saved.lineHeight>=1.5 && saved.lineHeight<=2.5) state.lineHeight = saved.lineHeight;
+    if(saved.themeColor) state.themeColor = saved.themeColor;
+    if(saved.codeTheme && CODE_THEMES[saved.codeTheme]) state.codeTheme = saved.codeTheme;
+    if(typeof saved.content === 'string') state.content = saved.content;
+  }
+} catch(e){}
+
+// ----- Sample Article -----
+var SAMPLE = '# 公众号 Markdown 美化器\n\n> 一键将 Markdown 转为公众号排版，复制粘贴即用。\n\n## 功能特性\n\n这是一个**纯前端**工具，支持以下 Markdown 语法：\n\n### 文本样式\n\n- **加粗文本**\n- *斜体文本*\n- ~~删除线文本~~\n- `行内代码` 也支持\n\n### 列表\n\n**无序列表：**\n\n- 第一项\n- 第二项\n- 第三项\n\n**有序列表：**\n\n1. 安装环境\n2. 编写代码\n3. 测试部署\n\n### 代码块\n\n```javascript\nfunction greet(name) {\n  const msg = `Hello, ${name}!`;\n  console.log(msg);\n  return msg;\n}\n\ngreet("World");\n```\n\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n - 1) + fibonacci(n - 2)\n\nfor i in range(10):\n    print(fibonacci(i))\n```\n\n### 引用\n\n> 代码是写给人看的，附带能在机器上运行。\n> — Harold Abelson\n\n### 表格\n\n| 工具 | 语言 | 特点 |\n|------|------|------|\n| FFmpeg | C | 音视频处理的瑞士军刀 |\n| QEMU | C | 全系统模拟器 |\n| TCC | C | 最快的 C 编译器 |\n| QuickJS | C | 极简 JS 引擎 |\n\n### 链接\n\n推荐阅读 [Markdown 指南](https://www.markdownguide.org)，也可以参考 [GitHub 文档](https://docs.github.com)。\n\n### 图片\n\n![示例图片](https://via.placeholder.com/600x200/e3f2fd/1890ff?text=公众号+Markdown+美化器)\n\n### 分隔线\n\n---\n\n### 多级标题\n\n#### 四级标题\n\n##### 五级标题\n\n###### 六级标题\n\n感谢使用！🎉\n';
+
+  if(!state.content) state.content = SAMPLE;
+
+// ----- DOM -----
+var editor = document.getElementById('editor');
+var preview = document.getElementById('preview');
+var themeSelect = document.getElementById('themeSelect');
+var copyBtn = document.getElementById('copyBtn');
+var settingsBtn = document.getElementById('settingsBtn');
+var settingsPanel = document.getElementById('settingsPanel');
+var settingsOverlay = document.getElementById('settingsOverlay');
+var settingsClose = document.getElementById('settingsClose');
+var fontSizeInput = document.getElementById('fontSize');
+var fontSizeVal = document.getElementById('fontSizeVal');
+var lineHeightInput = document.getElementById('lineHeight');
+var lineHeightVal = document.getElementById('lineHeightVal');
+var themeColorInput = document.getElementById('themeColor');
+var codeThemeSelect = document.getElementById('codeTheme');
+var charCountEl = document.getElementById('charCount');
+var themeNameEl = document.getElementById('themeName');
+var storageEl = document.getElementById('storageStatus');
+var toastEl = document.getElementById('toast');
+
+// ----- Init UI -----
+editor.value = state.content;
+themeSelect.value = state.theme;
+fontSizeInput.value = state.fontSize;
+fontSizeVal.textContent = state.fontSize+'px';
+lineHeightInput.value = state.lineHeight;
+lineHeightVal.textContent = state.lineHeight;
+themeColorInput.value = state.themeColor;
+codeThemeSelect.value = state.codeTheme;
+
+// ----- Markdown Parser -----
+function parseMD(src){
+  var links = [];
+  var linkIdx = 0;
+
+  // Normalize line endings
+  src = src.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  var t = getTheme();
+  var ct = CODE_THEMES[state.codeTheme] || CODE_THEMES.light;
+  var fs = state.fontSize;
+  var lh = state.lineHeight;
+  var tc = state.themeColor;
+
+  // Split into blocks
+  var lines = src.split('\n');
+  var html = '';
+  var i = 0;
+
+  while(i < lines.length){
+    var line = lines[i];
+
+    // Empty line
+    if(line.trim() === ''){
+      i++;
+      continue;
+    }
+
+    // Code block
+    var codeMatch = line.match(/^```(\w*)\s*$/);
+    if(codeMatch){
+      var lang = codeMatch[1];
+      var codeLines = [];
+      i++;
+      while(i < lines.length && !lines[i].match(/^```\s*$/)){
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++; // skip closing ```
+      var code = codeLines.join('\n');
+      var hl = highlightCode(code, lang);
+      html += '<pre style="background:'+ct.bg+';color:'+ct.color+';border:1px solid '+ct.border+';border-radius:4px;padding:16px;overflow-x:auto;font-family:Menlo,Consolas,\'Courier New\',monospace;font-size:13px;line-height:1.5;margin:16px 0;white-space:pre;word-wrap:normal"><code>'+hl+'</code></pre>';
+      continue;
+    }
+
+    // Horizontal rule
+    if(line.match(/^(---|\*\*\*|___)\s*$/)){
+      html += '<hr style="border:none;border-top:1px solid '+t.hrColor+';margin:24px 0">';
+      i++;
+      continue;
+    }
+
+    // Headings
+    var hMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if(hMatch){
+      var level = hMatch[1].length;
+      var hText = inlineFormat(hMatch[2], t, tc, links);
+      var hSizes = {1:24,2:20,3:18,4:16,5:14,6:13};
+      var hColors = {1:t.h1Color,2:t.h2Color,3:t.h3Color,4:t.h3Color,5:t.h3Color,6:t.h3Color};
+      var hWeight = level <= 3 ? 'bold' : '600';
+      var hMargin = level <= 2 ? '28px 0 16px' : '20px 0 12px';
+      var borderBottom = level === 1 ? 'border-bottom:2px solid '+tc+';padding-bottom:8px;' : level === 2 ? 'border-bottom:1px solid '+t.hrColor+';padding-bottom:6px;' : '';
+      html += '<h'+level+' style="font-size:'+hSizes[level]+'px;font-weight:'+hWeight+';color:'+hColors[level]+';margin:'+hMargin+';line-height:1.4;'+borderBottom+'">'+hText+'</h'+level+'>';
+      i++;
+      continue;
+    }
+
+    // Table
+    if(line.indexOf('|') >= 0 && i+1 < lines.length && lines[i+1].match(/^\|?\s*[-:]+[-| :]*$/)){
+      var tableRows = [];
+      // header
+      tableRows.push(parseTableRow(line));
+      i++; // separator
+      var aligns = parseTableAlign(lines[i]);
+      i++;
+      while(i < lines.length && lines[i].indexOf('|') >= 0 && lines[i].trim() !== ''){
+        tableRows.push(parseTableRow(lines[i]));
+        i++;
+      }
+      html += renderTable(tableRows, aligns, t, fs, lh, tc, links);
+      continue;
+    }
+
+    // Blockquote
+    if(line.match(/^>\s?/)){
+      var quoteLines = [];
+      while(i < lines.length && (lines[i].match(/^>\s?/) || (lines[i].trim() !== '' && quoteLines.length > 0 && !lines[i].match(/^[#\-\*\d]/) ))){
+        quoteLines.push(lines[i].replace(/^>\s?/, ''));
+        i++;
+      }
+      var quoteHtml = inlineFormat(quoteLines.join('<br>'), t, tc, links);
+      html += '<blockquote style="margin:16px 0;padding:12px 16px;background:'+t.quoteBg+';border-left:4px solid '+t.quoteBorder+';color:'+t.quoteColor+';font-size:'+fs+'px;line-height:'+lh+'">'+quoteHtml+'</blockquote>';
+      continue;
+    }
+
+    // Unordered list
+    if(line.match(/^[\-\*\+]\s/)){
+      var items = [];
+      while(i < lines.length && lines[i].match(/^[\-\*\+]\s/)){
+        items.push(lines[i].replace(/^[\-\*\+]\s/, ''));
+        i++;
+      }
+      html += '<ul style="margin:12px 0;padding-left:2em;list-style:disc">';
+      for(var li=0; li<items.length; li++){
+        html += '<li style="font-size:'+fs+'px;line-height:'+lh+';color:'+t.textColor+';margin:4px 0">'+inlineFormat(items[li],t,tc,links)+'</li>';
+      }
+      html += '</ul>';
+      continue;
+    }
+
+    // Ordered list
+    var olMatch = line.match(/^(\d+)\.\s/);
+    if(olMatch){
+      var items = [];
+      while(i < lines.length && lines[i].match(/^\d+\.\s/)){
+        items.push(lines[i].replace(/^\d+\.\s/, ''));
+        i++;
+      }
+      html += '<ol style="margin:12px 0;padding-left:2em;list-style:decimal">';
+      for(var li=0; li<items.length; li++){
+        html += '<li style="font-size:'+fs+'px;line-height:'+lh+';color:'+t.textColor+';margin:4px 0">'+inlineFormat(items[li],t,tc,links)+'</li>';
+      }
+      html += '</ol>';
+      continue;
+    }
+
+    // Paragraph
+    var paraLines = [line];
+    i++;
+    while(i < lines.length && lines[i].trim() !== '' && !lines[i].match(/^(#{1,6}\s|```|>|\-\s|\*\s|\+\s|\d+\.\s|---|\*\*\*|___|.*\|.*\|)/) ){
+      paraLines.push(lines[i]);
+      i++;
+    }
+    var paraText = inlineFormat(paraLines.join('\n'), t, tc, links);
+    html += '<p style="margin:12px 0;font-size:'+fs+'px;line-height:'+lh+';color:'+t.textColor+';letter-spacing:0.5px">'+paraText+'</p>';
+  }
+
+  // Footnotes for links
+  if(links.length > 0){
+    html += '<section style="margin-top:32px;padding-top:16px;border-top:1px solid '+t.hrColor+'">';
+    html += '<p style="font-size:12px;color:#999;margin-bottom:8px">参考链接</p>';
+    for(var fi=0; fi<links.length; fi++){
+      html += '<p style="font-size:12px;color:#999;margin:2px 0;word-break:break-all">['+links[fi].idx+'] '+links[fi].text+'：'+escHtml(links[fi].url)+'</p>';
+    }
+    html += '</section>';
+  }
+
+  return html;
+}
+
+function inlineFormat(text, t, tc, links){
+  // Escape HTML first (but preserve already-processed HTML tags from <br>)
+  text = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Restore <br>
+  text = text.replace(/&lt;br&gt;/g, '<br>');
+
+  // Images ![alt](url)
+  text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(m, alt, url){
+    return '<img src="'+url+'" alt="'+alt+'" style="display:block;max-width:100%;margin:12px auto;border-radius:4px">';
+  });
+
+  // Links [text](url) → footnote
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(m, lt, url){
+    links.push({idx: links.length+1, text: lt, url: url});
+    return '<span style="color:'+tc+';font-weight:500">'+lt+'</span><sup style="color:'+tc+';font-size:10px;margin-left:1px">['+links.length+']</sup>';
+  });
+
+  // Bold + Italic ***text*** or ___text___
+  text = text.replace(/\*{3}(.+?)\*{3}/g, '<strong style="font-weight:bold"><em style="font-style:italic">$1</em></strong>');
+  text = text.replace(/_{3}(.+?)_{3}/g, '<strong style="font-weight:bold"><em style="font-style:italic">$1</em></strong>');
+
+  // Bold **text** or __text__
+  text = text.replace(/\*{2}(.+?)\*{2}/g, '<strong style="font-weight:bold">$1</strong>');
+  text = text.replace(/_{2}(.+?)_{2}/g, '<strong style="font-weight:bold">$1</strong>');
+
+  // Italic *text* or _text_
+  text = text.replace(/\*(.+?)\*/g, '<em style="font-style:italic">$1</em>');
+  text = text.replace(/_(.+?)_/g, '<em style="font-style:italic">$1</em>');
+
+  // Strikethrough ~~text~~
+  text = text.replace(/~~(.+?)~~/g, '<del style="text-decoration:line-through;color:#999">$1</del>');
+
+  // Inline code `code`
+  text = text.replace(/`([^`]+)`/g, function(m, c){
+    return '<code style="background:'+(t.codeBg||'#f6f8fa')+';color:'+(t.codeColor||'#333')+';padding:2px 6px;border-radius:3px;font-family:Menlo,Consolas,\'Courier New\',monospace;font-size:0.9em">'+c+'</code>';
+  });
+
+  // Line breaks
+  text = text.replace(/\n/g, '<br>');
+
+  return text;
+}
+
+function parseTableRow(line){
+  line = line.trim();
+  if(line.startsWith('|')) line = line.substring(1);
+  if(line.endsWith('|')) line = line.substring(0, line.length-1);
+  return line.split('|').map(function(c){return c.trim()});
+}
+
+function parseTableAlign(line){
+  line = line.trim();
+  if(line.startsWith('|')) line = line.substring(1);
+  if(line.endsWith('|')) line = line.substring(0, line.length-1);
+  return line.split('|').map(function(c){
+    c = c.trim();
+    if(c.startsWith(':') && c.endsWith(':')) return 'center';
+    if(c.endsWith(':')) return 'right';
+    return 'left';
+  });
+}
+
+function renderTable(rows, aligns, t, fs, lh, tc, links){
+  var html = '<table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:'+fs+'px">';
+  for(var r=0; r<rows.length; r++){
+    var bg = r===0 ? t.tableHeaderBg : (r%2===0 ? t.tableStripeBg : '#fff');
+    html += '<tr>';
+    for(var c=0; c<rows[r].length; c++){
+      var tag = r===0 ? 'th' : 'td';
+      var align = aligns[c] || 'left';
+      var fw = r===0 ? 'font-weight:600;' : '';
+      html += '<'+tag+' style="border:1px solid '+t.tableBorderColor+';padding:8px 12px;text-align:'+align+';background:'+bg+';color:'+t.textColor+';line-height:'+lh+';'+fw+'">'+inlineFormat(rows[r][c],t,tc,links)+'</'+tag+'>';
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+  return html;
+}
+
+function getTheme(){
+  var base = THEMES[state.theme] || THEMES.minimal;
+  return Object.assign({}, base);
+}
+
+// ----- Render -----
+var renderTimer = null;
+function scheduleRender(){
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(render, 200);
+}
+
+function render(){
+  var md = editor.value;
+  state.content = md;
+  preview.innerHTML = parseMD(md);
+  charCountEl.textContent = md.length + ' 字';
+  themeNameEl.textContent = '主题：' + (THEMES[state.theme]||THEMES.minimal).name;
+  saveState();
+}
+
+function saveState(){
+  try{
+    localStorage.setItem('m2w_state', JSON.stringify(state));
+    storageEl.textContent = '存储：已保存';
+  }catch(e){
+    storageEl.textContent = '存储：空间不足';
+  }
+}
+
+// ----- Events -----
+editor.addEventListener('input', scheduleRender);
+
+themeSelect.addEventListener('change', function(){
+  state.theme = this.value;
+  // update themeColor to match theme
+  var defaults = {minimal:'#1890ff', tech:'#1890ff', literary:'#8d6e63'};
+  state.themeColor = defaults[state.theme] || '#1890ff';
+  themeColorInput.value = state.themeColor;
+  render();
+});
+
+fontSizeInput.addEventListener('input', function(){
+  state.fontSize = parseInt(this.value);
+  fontSizeVal.textContent = this.value+'px';
+  render();
+});
+
+lineHeightInput.addEventListener('input', function(){
+  state.lineHeight = parseFloat(this.value);
+  lineHeightVal.textContent = parseFloat(this.value).toFixed(2);
+  render();
+});
+
+themeColorInput.addEventListener('input', function(){
+  state.themeColor = this.value;
+  render();
+});
+
+codeThemeSelect.addEventListener('change', function(){
+  state.codeTheme = this.value;
+  render();
+});
+
+// Settings panel
+settingsBtn.addEventListener('click', function(){
+  settingsPanel.classList.toggle('show');
+  settingsOverlay.classList.toggle('show');
+  settingsBtn.classList.toggle('active');
+});
+settingsOverlay.addEventListener('click', closeSettings);
+settingsClose.addEventListener('click', closeSettings);
+function closeSettings(){
+  settingsPanel.classList.remove('show');
+  settingsOverlay.classList.remove('show');
+  settingsBtn.classList.remove('active');
+}
+
+// Copy
+copyBtn.addEventListener('click', function(){
+  var content = preview.innerHTML;
+  if(!content){showToast('没有可复制的内容');return}
+
+  // Try Clipboard API with HTML
+  if(navigator.clipboard && window.ClipboardItem){
+    var blob = new Blob([content], {type:'text/html'});
+    var item = new ClipboardItem({'text/html': blob, 'text/plain': new Blob([editor.value], {type:'text/plain'})});
+    navigator.clipboard.write([item]).then(function(){
+      showToast('复制成功 ✅');
+      copyBtn.innerHTML = '✅ 已复制';
+      setTimeout(function(){copyBtn.innerHTML = '📋 复制'},2000);
+    }).catch(function(){
+      fallbackCopy();
+    });
+  } else {
+    fallbackCopy();
+  }
+});
+
+function fallbackCopy(){
+  // Select the preview content
+  var range = document.createRange();
+  range.selectNodeContents(preview);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try{
+    document.execCommand('copy');
+    showToast('复制成功 ✅');
+    copyBtn.innerHTML = '✅ 已复制';
+    setTimeout(function(){copyBtn.innerHTML = '📋 复制'},2000);
+  }catch(e){
+    showToast('请手动 Ctrl+C / Cmd+C 复制');
+  }
+  sel.removeAllRanges();
+}
+
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  setTimeout(function(){toastEl.classList.remove('show')},2000);
+}
+
+// ----- Init Render -----
+render();
+
+})();
+</script>
+</body>
+</html>
