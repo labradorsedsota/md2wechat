@@ -11,36 +11,15 @@ html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",
 
 /* ===== Layout ===== */
 .app{display:flex;flex-direction:column;height:100vh;min-width:1024px}
-.toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:none;box-shadow:0 1px 8px rgba(0,0,0,.06);gap:12px;flex-shrink:0;position:relative;z-index:10}
-.toolbar-left{display:flex;align-items:center;gap:16px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;background:#fff;border-bottom:1px solid #e8e8e8;gap:12px;flex-shrink:0}
+.toolbar-left{display:flex;align-items:center;gap:12px}
 .toolbar-right{display:flex;align-items:center;gap:12px}
-.main{display:flex;flex:1;overflow:hidden;position:relative}
-.editor-pane{flex:1;display:flex;flex-direction:column;background:#fafafa;min-width:280px}
-.resize-handle{width:6px;cursor:col-resize;background:#e8e8e8;transition:background .2s;flex-shrink:0;position:relative;z-index:5}
-.resize-handle:hover,.resize-handle.dragging{background:#1890ff;opacity:.5}
-.preview-pane{flex:1;display:flex;flex-direction:column;background:#e8e8e8;overflow-y:auto;padding:24px;min-width:320px}
+.main{display:flex;flex:1;overflow:hidden}
+.editor-pane{flex:1;display:flex;flex-direction:column;border-right:1px solid #e8e8e8;background:#fafafa}
+.preview-pane{flex:1;display:flex;flex-direction:column;background:#e8e8e8;overflow-y:auto;padding:24px}
 .editor-pane textarea{flex:1;border:none;outline:none;resize:none;padding:20px;font-family:Menlo,Consolas,"Courier New",monospace;font-size:14px;line-height:1.6;color:#333;background:#fafafa;tab-size:4}
-.preview-wrapper{max-width:680px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.08);width:100%;overflow:hidden}
-.preview-content{padding:32px 28px}
+.preview-wrapper{max-width:680px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:32px 28px;width:100%}
 .statusbar{display:flex;align-items:center;justify-content:space-between;padding:4px 20px;background:#fafafa;border-top:1px solid #e8e8e8;font-size:12px;color:#999;flex-shrink:0}
-
-/* ===== WeChat Article Shell ===== */
-.wechat-header{padding:20px 28px 16px;border-bottom:1px solid #f0f0f0}
-.wechat-title{font-size:22px;font-weight:700;color:#111;line-height:1.4;margin-bottom:12px;min-height:30px}
-.wechat-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:#999}
-.wechat-meta .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:600}
-.wechat-meta .author-name{color:#576b95;font-weight:500}
-.wechat-footer{padding:16px 28px 20px;border-top:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b0b0b0}
-
-/* ===== Theme Cards ===== */
-.theme-cards{display:flex;gap:6px;align-items:center}
-.theme-card{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative;overflow:hidden}
-.theme-card:hover{transform:scale(1.15);box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.theme-card.active{border-color:#333;box-shadow:0 0 0 2px rgba(0,0,0,.1)}
-.theme-card .tc-top{position:absolute;top:0;left:0;right:0;height:50%}
-.theme-card .tc-bot{position:absolute;bottom:0;left:0;right:0;height:50%}
-.theme-card-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:11px;padding:2px 8px;border-radius:3px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s}
-.theme-card:hover .theme-card-tip{opacity:1}
 
 /* ===== Toolbar Controls ===== */
 .toolbar label{font-size:13px;color:#666}
@@ -77,14 +56,6 @@ html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",
 
 /* ===== Copy Success Animation ===== */
 .copy-ok .btn-primary{background:#52c41a !important}
-@keyframes ripple{0%{transform:scale(0);opacity:.5}100%{transform:scale(2.5);opacity:0}}
-.btn-primary{position:relative;overflow:hidden}
-.btn-primary .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);width:40px;height:40px;animation:ripple .6s ease-out forwards;pointer-events:none}
-
-/* ===== Brand ===== */
-.brand{display:flex;align-items:center;gap:8px}
-.brand-icon{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
-.brand-text{font-size:15px;font-weight:600;color:#333}
 </style>
 </head>
 <body>
@@ -92,11 +63,16 @@ html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",
   <!-- Toolbar -->
   <div class="toolbar">
     <div class="toolbar-left">
-      <div class="brand">
-        <div class="brand-icon">M</div>
-        <span class="brand-text">Markdown 美化器</span>
-      </div>
-      <div class="theme-cards" id="themeCards"></div>
+      <span style="font-size:15px;font-weight:600;color:#333">📝 公众号 Markdown 美化器</span>
+      <label>主题
+        <select id="themeSelect">
+          <option value="minimal">简约</option>
+          <option value="tech">科技</option>
+          <option value="literary">文艺</option>
+          <option value="acg">二次元</option>
+          <option value="business">商务</option>
+        </select>
+      </label>
     </div>
     <div class="toolbar-right">
       <button class="btn-icon" id="settingsBtn" title="样式微调">⚙</button>
@@ -106,26 +82,11 @@ html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",
 
   <!-- Main -->
   <div class="main">
-    <div class="editor-pane" id="editorPane">
-      <textarea id="editor" spellcheck="false" placeholder="在这里写 Markdown，右侧实时预览公众号排版效果 ✨"></textarea>
+    <div class="editor-pane">
+      <textarea id="editor" spellcheck="false" placeholder="在此输入 Markdown..."></textarea>
     </div>
-    <div class="resize-handle" id="resizeHandle"></div>
     <div class="preview-pane" id="previewPane">
-      <div class="preview-wrapper">
-        <div class="wechat-header">
-          <div class="wechat-title" id="wechatTitle">公众号文章标题</div>
-          <div class="wechat-meta">
-            <div class="avatar">M</div>
-            <span class="author-name">我的公众号</span>
-            <span id="wechatDate"></span>
-          </div>
-        </div>
-        <div class="preview-content" id="preview"></div>
-        <div class="wechat-footer">
-          <span>阅读 1,024</span>
-          <span>在看 32 · 赞 18</span>
-        </div>
-      </div>
+      <div class="preview-wrapper" id="preview"></div>
     </div>
   </div>
 
@@ -306,7 +267,7 @@ var SAMPLE = '# 公众号 Markdown 美化器\n\n> 一键将 Markdown 转为公�
 // ----- DOM -----
 var editor = document.getElementById('editor');
 var preview = document.getElementById('preview');
-var themeCardsEl = document.getElementById('themeCards');
+var themeSelect = document.getElementById('themeSelect');
 var copyBtn = document.getElementById('copyBtn');
 var settingsBtn = document.getElementById('settingsBtn');
 var settingsPanel = document.getElementById('settingsPanel');
@@ -322,50 +283,10 @@ var charCountEl = document.getElementById('charCount');
 var themeNameEl = document.getElementById('themeName');
 var storageEl = document.getElementById('storageStatus');
 var toastEl = document.getElementById('toast');
-var wechatTitleEl = document.getElementById('wechatTitle');
-var wechatDateEl = document.getElementById('wechatDate');
-var resizeHandle = document.getElementById('resizeHandle');
-var editorPane = document.getElementById('editorPane');
-
-// ----- Theme Card Colors -----
-var THEME_COLORS = {
-  minimal: {top:'#fff', bot:'#f0f0f0'},
-  tech: {top:'#0d47a1', bot:'#e3f2fd'},
-  literary: {top:'#8d6e63', bot:'#fbe9e7'},
-  acg: {top:'#e91e90', bot:'#f3e5f5'},
-  business: {top:'#1a237e', bot:'#c5a842'}
-};
-
-// ----- Build Theme Cards -----
-function buildThemeCards(){
-  themeCardsEl.innerHTML = '';
-  var keys = Object.keys(THEMES);
-  for(var k=0; k<keys.length; k++){
-    var key = keys[k];
-    var card = document.createElement('div');
-    card.className = 'theme-card' + (key===state.theme?' active':'');
-    card.dataset.theme = key;
-    var colors = THEME_COLORS[key] || {top:'#999',bot:'#ccc'};
-    card.innerHTML = '<div class="tc-top" style="background:'+colors.top+'"></div><div class="tc-bot" style="background:'+colors.bot+'"></div><span class="theme-card-tip">'+THEMES[key].name+'</span>';
-    card.addEventListener('click', (function(t){ return function(){
-      state.theme = t;
-      var defaults = {minimal:'#1890ff', tech:'#1890ff', literary:'#8d6e63', acg:'#e91e90', business:'#1a237e'};
-      state.themeColor = defaults[t] || '#1890ff';
-      themeColorInput.value = state.themeColor;
-      buildThemeCards();
-      render();
-    }})(key));
-    themeCardsEl.appendChild(card);
-  }
-}
-
-// ----- Set WeChat date -----
-var now = new Date();
-wechatDateEl.textContent = now.getFullYear()+'-'+(now.getMonth()+1<10?'0':'')+(now.getMonth()+1)+'-'+(now.getDate()<10?'0':'')+now.getDate();
 
 // ----- Init UI -----
 editor.value = state.content;
-buildThemeCards();
+themeSelect.value = state.theme;
 fontSizeInput.value = state.fontSize;
 fontSizeVal.textContent = state.fontSize+'px';
 lineHeightInput.value = state.lineHeight;
@@ -625,9 +546,6 @@ function render(){
   var md = editor.value;
   state.content = md;
   preview.innerHTML = parseMD(md);
-  // Sync WeChat title from first h1
-  var h1Match = md.match(/^#\s+(.+)$/m);
-  wechatTitleEl.textContent = h1Match ? h1Match[1] : '公众号文章标题';
   charCountEl.textContent = md.length + ' 字';
   themeNameEl.textContent = '主题：' + (THEMES[state.theme]||THEMES.minimal).name;
   saveState();
@@ -645,7 +563,14 @@ function saveState(){
 // ----- Events -----
 editor.addEventListener('input', scheduleRender);
 
-// Theme switching is handled by theme card click handlers above
+themeSelect.addEventListener('change', function(){
+  state.theme = this.value;
+  // update themeColor to match theme
+  var defaults = {minimal:'#1890ff', tech:'#1890ff', literary:'#8d6e63', acg:'#e91e90', business:'#1a237e'};
+  state.themeColor = defaults[state.theme] || '#1890ff';
+  themeColorInput.value = state.themeColor;
+  render();
+});
 
 fontSizeInput.addEventListener('input', function(){
   state.fontSize = parseInt(this.value);
@@ -684,16 +609,7 @@ function closeSettings(){
 }
 
 // Copy
-copyBtn.addEventListener('click', function(e){
-  // Ripple effect
-  var ripple = document.createElement('span');
-  ripple.className = 'ripple';
-  var rect = copyBtn.getBoundingClientRect();
-  ripple.style.left = (e.clientX - rect.left - 20) + 'px';
-  ripple.style.top = (e.clientY - rect.top - 20) + 'px';
-  copyBtn.appendChild(ripple);
-  setTimeout(function(){ripple.remove()},600);
-
+copyBtn.addEventListener('click', function(){
   var content = preview.innerHTML;
   if(!content){showToast('没有可复制的内容');return}
 
@@ -736,34 +652,6 @@ function showToast(msg){
   toastEl.classList.add('show');
   setTimeout(function(){toastEl.classList.remove('show')},2000);
 }
-
-// ----- Resize Handle -----
-(function(){
-  var dragging = false;
-  var mainEl = document.querySelector('.main');
-  resizeHandle.addEventListener('mousedown', function(e){
-    e.preventDefault();
-    dragging = true;
-    resizeHandle.classList.add('dragging');
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  });
-  document.addEventListener('mousemove', function(e){
-    if(!dragging) return;
-    var mainRect = mainEl.getBoundingClientRect();
-    var pct = ((e.clientX - mainRect.left) / mainRect.width) * 100;
-    pct = Math.max(20, Math.min(80, pct));
-    editorPane.style.flex = 'none';
-    editorPane.style.width = pct + '%';
-  });
-  document.addEventListener('mouseup', function(){
-    if(!dragging) return;
-    dragging = false;
-    resizeHandle.classList.remove('dragging');
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  });
-})();
 
 // ----- Init Render -----
 render();
