@@ -7,36 +7,83 @@
 <style>
 /* ===== Reset & Base ===== */
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;font-size:14px;color:#333;background:#f0f0f0}
+html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;font-size:14px;color:#24292f;background:#f0f2f5}
+
+/* ===== Custom Scrollbar §8.4 ===== */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d0d0d0;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#aaa}
 
 /* ===== Layout ===== */
 .app{display:flex;flex-direction:column;height:100vh;min-width:1024px}
-.toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;background:#fff;border-bottom:1px solid #e8e8e8;gap:12px;flex-shrink:0}
-.toolbar-left{display:flex;align-items:center;gap:12px}
+
+/* §8.2 Toolbar */
+.toolbar{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 24px;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 1px 8px rgba(0,0,0,0.06);flex-shrink:0;position:sticky;top:0;z-index:10}
+.toolbar-left{display:flex;align-items:center;gap:20px}
 .toolbar-right{display:flex;align-items:center;gap:12px}
-.main{display:flex;flex:1;overflow:hidden}
-.editor-pane{flex:1;display:flex;flex-direction:column;border-right:1px solid #e8e8e8;background:#fafafa}
-.preview-pane{flex:1;display:flex;flex-direction:column;background:#e8e8e8;overflow-y:auto;padding:24px}
-.editor-pane textarea{flex:1;border:none;outline:none;resize:none;padding:20px;font-family:Menlo,Consolas,"Courier New",monospace;font-size:14px;line-height:1.6;color:#333;background:#fafafa;tab-size:4}
-.preview-wrapper{max-width:680px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:32px 28px;width:100%}
-.statusbar{display:flex;align-items:center;justify-content:space-between;padding:4px 20px;background:#fafafa;border-top:1px solid #e8e8e8;font-size:12px;color:#999;flex-shrink:0}
+
+/* Brand §8.2 */
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0}
+.brand-text{font-size:15px;font-weight:600;color:#1a1a2e;white-space:nowrap}
+
+/* §8.3 Theme Cards */
+.theme-selector{display:flex;align-items:center;gap:10px}
+.theme-label{font-size:13px;color:#999}
+.theme-cards{display:flex;gap:8px;align-items:center}
+.theme-card{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 200ms ease;position:relative;flex-shrink:0}
+.theme-card:hover{width:32px;height:32px;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.theme-card.active{border-color:currentColor;box-shadow:0 0 0 2px rgba(0,0,0,0.08)}
+.theme-card-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:11px;padding:3px 10px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 200ms}
+.theme-card-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#333}
+.theme-card:hover .theme-card-tip{opacity:1}
+
+.main{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* §8.4 Editor */
+.editor-pane{flex:1;display:flex;flex-direction:column;background:#fafbfc;min-width:30%}
+.editor-pane textarea{flex:1;border:none;outline:none;resize:none;padding:24px;font-family:'JetBrains Mono',Menlo,Consolas,'Courier New',monospace;font-size:14px;line-height:1.6;color:#24292f;background:#fafbfc;tab-size:4;caret-color:#1890ff}
+.editor-pane textarea::placeholder{color:#bbb;font-style:italic}
+
+/* §8.6 Resize Handle */
+.resize-handle{width:5px;cursor:col-resize;background:#e8e8e8;transition:background 200ms;flex-shrink:0;position:relative}
+.resize-handle::before{content:'';position:absolute;top:0;bottom:0;left:-5px;right:-5px}
+.resize-handle:hover,.resize-handle.dragging{background:#1890ff}
+
+/* §8.5 Preview */
+.preview-pane{flex:1;display:flex;flex-direction:column;background:#f0f2f5;overflow-y:auto;padding:24px;min-width:30%}
+.preview-wrapper{max-width:680px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);width:100%;overflow:hidden}
+.preview-content{padding:36px 32px}
+
+/* §8.5.1 WeChat Shell */
+.wechat-header{padding:20px 32px 16px;border-bottom:1px solid #f0f0f0}
+.wechat-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:#999}
+.wechat-meta .author-name{font-size:14px;color:#576b95;font-weight:500}
+.wechat-meta .pub-date{font-size:12px;color:#999}
+.wechat-footer{padding:16px 32px 20px;border-top:1px solid #f0f0f0;font-size:12px;color:#999;display:flex;gap:16px;justify-content:flex-end}
+
+/* §8.9 Status Bar */
+.statusbar{display:flex;align-items:center;justify-content:space-between;height:28px;padding:0 20px;background:#fafbfc;border-top:1px solid #e8e8e8;font-size:12px;color:#999;flex-shrink:0}
 
 /* ===== Toolbar Controls ===== */
-.toolbar label{font-size:13px;color:#666}
-.toolbar select{padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px;background:#fff;cursor:pointer;outline:none}
-.toolbar select:focus{border-color:#1890ff}
-.btn{padding:6px 16px;border:none;border-radius:4px;font-size:13px;cursor:pointer;transition:all .2s}
-.btn-primary{background:#1890ff;color:#fff}
-.btn-primary:hover{background:#40a9ff}
-.btn-primary:active{background:#096dd9}
-.btn-icon{background:none;border:1px solid #d9d9d9;border-radius:4px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#666;transition:all .2s}
-.btn-icon:hover{border-color:#1890ff;color:#1890ff}
-.btn-icon.active{border-color:#1890ff;color:#1890ff;background:#e6f7ff}
+.btn{border:none;border-radius:4px;font-size:13px;cursor:pointer;transition:all 150ms ease}
+.btn-icon{background:none;border:1px solid #d9d9d9;border-radius:4px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#666;transition:all 150ms ease}
+.btn-icon:hover{border-color:#667eea;color:#667eea}
+.btn-icon.active{border-color:#667eea;color:#667eea;background:rgba(102,126,234,0.08)}
 
-/* ===== Settings Panel ===== */
-.settings-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.15);z-index:100;display:none}
+/* §8.8 Copy Button */
+.btn-copy{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:all 200ms ease;position:relative;overflow:hidden}
+.btn-copy:hover{filter:brightness(1.1);box-shadow:0 2px 8px rgba(102,126,234,0.4)}
+.btn-copy:active{transform:scale(0.95)}
+.btn-copy.success{background:#52c41a;animation:copyPop 200ms ease}
+.btn-copy.fail{background:#ff4d4f}
+@keyframes copyPop{0%{transform:scale(0.95)}100%{transform:scale(1)}}
+
+/* ===== Settings Panel §8.7 ===== */
+.settings-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.15);z-index:100;display:none}
 .settings-overlay.show{display:block}
-.settings-panel{position:fixed;top:0;right:0;width:300px;height:100%;background:#fff;z-index:101;box-shadow:-2px 0 8px rgba(0,0,0,.1);transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+.settings-panel{position:fixed;top:0;right:0;width:300px;height:100%;background:#fff;z-index:101;box-shadow:-2px 0 8px rgba(0,0,0,.1);transform:translateX(100%);transition:transform 250ms ease;display:flex;flex-direction:column}
 .settings-panel.show{transform:translateX(0)}
 .settings-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e8e8e8}
 .settings-header h3{font-size:15px;font-weight:600}
@@ -46,47 +93,56 @@ html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",
 .setting-item{margin-bottom:20px}
 .setting-item label{display:block;font-size:13px;color:#666;margin-bottom:8px}
 .setting-item .range-row{display:flex;align-items:center;gap:8px}
-.setting-item input[type=range]{flex:1;accent-color:#1890ff}
+.setting-item input[type=range]{flex:1;accent-color:#667eea}
 .setting-item .range-val{font-size:12px;color:#999;min-width:40px;text-align:right}
 .setting-item input[type=color]{width:40px;height:30px;border:1px solid #d9d9d9;border-radius:4px;cursor:pointer;padding:2px}
 
-/* ===== Toast ===== */
-.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:#333;color:#fff;padding:8px 24px;border-radius:4px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:200}
+/* ===== Toast §8.12 ===== */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);background:#333;color:#fff;padding:8px 24px;border-radius:6px;font-size:13px;opacity:0;transition:all 300ms ease;pointer-events:none;z-index:200}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* ===== Copy Success Animation ===== */
-.copy-ok .btn-primary{background:#52c41a !important}
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- Toolbar -->
+  <!-- Toolbar §8.2 -->
   <div class="toolbar">
     <div class="toolbar-left">
-      <span style="font-size:15px;font-weight:600;color:#333">📝 公众号 Markdown 美化器</span>
-      <label>主题
-        <select id="themeSelect">
-          <option value="minimal">简约</option>
-          <option value="tech">科技</option>
-          <option value="literary">文艺</option>
-          <option value="acg">二次元</option>
-          <option value="business">商务</option>
-        </select>
-      </label>
+      <div class="brand">
+        <div class="brand-icon">M</div>
+        <span class="brand-text">Markdown 美化器</span>
+      </div>
+      <div class="theme-selector">
+        <span class="theme-label">主题</span>
+        <div class="theme-cards" id="themeCards"></div>
+      </div>
     </div>
     <div class="toolbar-right">
       <button class="btn-icon" id="settingsBtn" title="样式微调">⚙</button>
-      <button class="btn btn-primary" id="copyBtn">📋 复制</button>
+      <button class="btn-copy" id="copyBtn">📋 复制</button>
     </div>
   </div>
 
   <!-- Main -->
-  <div class="main">
-    <div class="editor-pane">
-      <textarea id="editor" spellcheck="false" placeholder="在此输入 Markdown..."></textarea>
+  <div class="main" id="mainArea">
+    <div class="editor-pane" id="editorPane">
+      <textarea id="editor" spellcheck="false" placeholder="在这里粘贴或编写你的 Markdown 文章..."></textarea>
     </div>
+    <div class="resize-handle" id="resizeHandle"></div>
     <div class="preview-pane" id="previewPane">
-      <div class="preview-wrapper" id="preview"></div>
+      <div class="preview-wrapper">
+        <div class="wechat-header">
+          <div class="wechat-meta">
+            <span class="author-name">我的公众号</span>
+            <span class="pub-date" id="wechatDate"></span>
+          </div>
+        </div>
+        <div class="preview-content" id="preview"></div>
+        <div class="wechat-footer">
+          <span>❤️ 喜欢</span>
+          <span>👀 在看</span>
+          <span>⭐ 收藏</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -267,7 +323,7 @@ var SAMPLE = '# 公众号 Markdown 美化器\n\n> 一键将 Markdown 转为公�
 // ----- DOM -----
 var editor = document.getElementById('editor');
 var preview = document.getElementById('preview');
-var themeSelect = document.getElementById('themeSelect');
+var themeCardsEl = document.getElementById('themeCards');
 var copyBtn = document.getElementById('copyBtn');
 var settingsBtn = document.getElementById('settingsBtn');
 var settingsPanel = document.getElementById('settingsPanel');
@@ -283,10 +339,43 @@ var charCountEl = document.getElementById('charCount');
 var themeNameEl = document.getElementById('themeName');
 var storageEl = document.getElementById('storageStatus');
 var toastEl = document.getElementById('toast');
+var wechatDateEl = document.getElementById('wechatDate');
+var resizeHandle = document.getElementById('resizeHandle');
+var editorPane = document.getElementById('editorPane');
+var mainArea = document.getElementById('mainArea');
+
+// §8.3 Theme card colors
+var THEME_CARD_COLORS = {minimal:'#333',tech:'#1890ff',literary:'#8d6e63',acg:'#e91e90',business:'#1a237e'};
+
+// Build theme cards
+function buildThemeCards(){
+  themeCardsEl.innerHTML='';
+  Object.keys(THEMES).forEach(function(key){
+    var c = document.createElement('div');
+    c.className='theme-card'+(key===state.theme?' active':'');
+    c.style.background=THEME_CARD_COLORS[key]||'#999';
+    c.style.color=THEME_CARD_COLORS[key]||'#999';
+    c.innerHTML='<span class="theme-card-tip">'+THEMES[key].name+'</span>';
+    c.addEventListener('click',function(){
+      state.theme=key;
+      var defaults={minimal:'#1890ff',tech:'#1890ff',literary:'#8d6e63',acg:'#e91e90',business:'#1a237e'};
+      state.themeColor=defaults[key]||'#1890ff';
+      themeColorInput.value=state.themeColor;
+      editor.style.caretColor=state.themeColor;
+      buildThemeCards();
+      render();
+    });
+    themeCardsEl.appendChild(c);
+  });
+}
+
+// Set WeChat date §8.5.1
+(function(){var d=new Date();wechatDateEl.textContent=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 
 // ----- Init UI -----
 editor.value = state.content;
-themeSelect.value = state.theme;
+editor.style.caretColor = state.themeColor;
+buildThemeCards();
 fontSizeInput.value = state.fontSize;
 fontSizeVal.textContent = state.fontSize+'px';
 lineHeightInput.value = state.lineHeight;
@@ -563,14 +652,7 @@ function saveState(){
 // ----- Events -----
 editor.addEventListener('input', scheduleRender);
 
-themeSelect.addEventListener('change', function(){
-  state.theme = this.value;
-  // update themeColor to match theme
-  var defaults = {minimal:'#1890ff', tech:'#1890ff', literary:'#8d6e63', acg:'#e91e90', business:'#1a237e'};
-  state.themeColor = defaults[state.theme] || '#1890ff';
-  themeColorInput.value = state.themeColor;
-  render();
-});
+// Theme switching handled by theme card click handlers
 
 fontSizeInput.addEventListener('input', function(){
   state.fontSize = parseInt(this.value);
@@ -608,42 +690,41 @@ function closeSettings(){
   settingsBtn.classList.remove('active');
 }
 
-// Copy
+// Copy §8.8
 copyBtn.addEventListener('click', function(){
   var content = preview.innerHTML;
   if(!content){showToast('没有可复制的内容');return}
+
+  function onCopySuccess(){
+    showToast('复制成功 ✅');
+    copyBtn.textContent='✅ 已复制';
+    copyBtn.classList.add('success');
+    setTimeout(function(){copyBtn.textContent='📋 复制';copyBtn.classList.remove('success')},1500);
+  }
+  function onCopyFail(){
+    showToast('请手动 Ctrl+C / Cmd+C 复制');
+    copyBtn.textContent='❌ 失败';
+    copyBtn.classList.add('fail');
+    setTimeout(function(){copyBtn.textContent='📋 复制';copyBtn.classList.remove('fail')},1500);
+  }
 
   // Try Clipboard API with HTML
   if(navigator.clipboard && window.ClipboardItem){
     var blob = new Blob([content], {type:'text/html'});
     var item = new ClipboardItem({'text/html': blob, 'text/plain': new Blob([editor.value], {type:'text/plain'})});
-    navigator.clipboard.write([item]).then(function(){
-      showToast('复制成功 ✅');
-      copyBtn.innerHTML = '✅ 已复制';
-      setTimeout(function(){copyBtn.innerHTML = '📋 复制'},2000);
-    }).catch(function(){
-      fallbackCopy();
-    });
+    navigator.clipboard.write([item]).then(onCopySuccess).catch(function(){fallbackCopy(onCopySuccess,onCopyFail)});
   } else {
-    fallbackCopy();
+    fallbackCopy(onCopySuccess,onCopyFail);
   }
 });
 
-function fallbackCopy(){
-  // Select the preview content
+function fallbackCopy(onOk,onFail){
   var range = document.createRange();
   range.selectNodeContents(preview);
   var sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
-  try{
-    document.execCommand('copy');
-    showToast('复制成功 ✅');
-    copyBtn.innerHTML = '✅ 已复制';
-    setTimeout(function(){copyBtn.innerHTML = '📋 复制'},2000);
-  }catch(e){
-    showToast('请手动 Ctrl+C / Cmd+C 复制');
-  }
+  try{document.execCommand('copy');onOk()}catch(e){onFail()}
   sel.removeAllRanges();
 }
 
@@ -652,6 +733,32 @@ function showToast(msg){
   toastEl.classList.add('show');
   setTimeout(function(){toastEl.classList.remove('show')},2000);
 }
+
+// §8.6 Resize Handle
+(function(){
+  var dragging=false;
+  resizeHandle.addEventListener('mousedown',function(e){
+    e.preventDefault();dragging=true;
+    resizeHandle.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!dragging)return;
+    var rect=mainArea.getBoundingClientRect();
+    var pct=((e.clientX-rect.left)/rect.width)*100;
+    pct=Math.max(30,Math.min(70,pct));
+    editorPane.style.flex='none';
+    editorPane.style.width=pct+'%';
+  });
+  document.addEventListener('mouseup',function(){
+    if(!dragging)return;
+    dragging=false;
+    resizeHandle.classList.remove('dragging');
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
+  });
+})();
 
 // ----- Init Render -----
 render();
