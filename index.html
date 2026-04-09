@@ -69,6 +69,8 @@ html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",
           <option value="minimal">简约</option>
           <option value="tech">科技</option>
           <option value="literary">文艺</option>
+          <option value="acg">二次元</option>
+          <option value="business">商务</option>
         </select>
       </label>
     </div>
@@ -204,6 +206,26 @@ var THEMES = {
     codeBg:'#efebe9', codeColor:'#4e342e', codeBorder:'#d7ccc8',
     tableBorderColor:'#d7ccc8', tableHeaderBg:'#efebe9', tableStripeBg:'#fafaf8',
     hrColor:'#d7ccc8'
+  },
+  acg: {
+    name:'二次元',
+    h1Color:'#e91e90', h2Color:'#9c27b0', h3Color:'#7c4dff',
+    textColor:'#424242', linkColor:'#e91e90',
+    quoteBg:'#fce4ec', quoteBorder:'#e91e90', quoteColor:'#6a1b9a',
+    codeBg:'#fce4ec', codeColor:'#880e4f', codeBorder:'#f8bbd0',
+    tableBorderColor:'#e1bee7', tableHeaderBg:'#f3e5f5', tableStripeBg:'#fce4ec',
+    hrColor:'#e1bee7',
+    h1Deco:'gradient', headingFont:null
+  },
+  business: {
+    name:'商务',
+    h1Color:'#1a237e', h2Color:'#283593', h3Color:'#303f9f',
+    textColor:'#37474f', linkColor:'#1a237e',
+    quoteBg:'#e8eaf6', quoteBorder:'#c5a842', quoteColor:'#1a237e',
+    codeBg:'#eceff1', codeColor:'#263238', codeBorder:'#b0bec5',
+    tableBorderColor:'#90a4ae', tableHeaderBg:'#1a237e', tableHeaderColor:'#fff', tableStripeBg:'#f5f5f5',
+    hrColor:'#c5a842',
+    h1Deco:null, headingFont:"'Georgia','Noto Serif SC',serif"
   }
 };
 
@@ -334,7 +356,12 @@ function parseMD(src){
       var hWeight = level <= 3 ? 'bold' : '600';
       var hMargin = level <= 2 ? '28px 0 16px' : '20px 0 12px';
       var borderBottom = level === 1 ? 'border-bottom:2px solid '+tc+';padding-bottom:8px;' : level === 2 ? 'border-bottom:1px solid '+t.hrColor+';padding-bottom:6px;' : '';
-      html += '<h'+level+' style="font-size:'+hSizes[level]+'px;font-weight:'+hWeight+';color:'+hColors[level]+';margin:'+hMargin+';line-height:1.4;'+borderBottom+'">'+hText+'</h'+level+'>';
+      var hFontFamily = t.headingFont ? 'font-family:'+t.headingFont+';' : '';
+      var hExtra = '';
+      if(t.h1Deco==='gradient' && level <= 2){
+        hExtra = 'background:linear-gradient(135deg,#e91e90,#9c27b0,#7c4dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;';
+      }
+      html += '<h'+level+' style="font-size:'+hSizes[level]+'px;font-weight:'+hWeight+';color:'+hColors[level]+';margin:'+hMargin+';line-height:1.4;'+borderBottom+hFontFamily+hExtra+'">'+hText+'</h'+level+'>';
       i++;
       continue;
     }
@@ -363,7 +390,8 @@ function parseMD(src){
         i++;
       }
       var quoteHtml = inlineFormat(quoteLines.join('<br>'), t, tc, links);
-      html += '<blockquote style="margin:16px 0;padding:12px 16px;background:'+t.quoteBg+';border-left:4px solid '+t.quoteBorder+';color:'+t.quoteColor+';font-size:'+fs+'px;line-height:'+lh+'">'+quoteHtml+'</blockquote>';
+      var quoteRadius = t.h1Deco==='gradient' ? 'border-radius:12px;' : '';
+      html += '<blockquote style="margin:16px 0;padding:12px 16px;background:'+t.quoteBg+';border-left:4px solid '+t.quoteBorder+';color:'+t.quoteColor+';font-size:'+fs+'px;line-height:'+lh+';'+quoteRadius+'">'+quoteHtml+'</blockquote>';
       continue;
     }
 
@@ -493,7 +521,8 @@ function renderTable(rows, aligns, t, fs, lh, tc, links){
       var tag = r===0 ? 'th' : 'td';
       var align = aligns[c] || 'left';
       var fw = r===0 ? 'font-weight:600;' : '';
-      html += '<'+tag+' style="border:1px solid '+t.tableBorderColor+';padding:8px 12px;text-align:'+align+';background:'+bg+';color:'+t.textColor+';line-height:'+lh+';'+fw+'">'+inlineFormat(rows[r][c],t,tc,links)+'</'+tag+'>';
+      var cellColor = (r===0 && t.tableHeaderColor) ? t.tableHeaderColor : t.textColor;
+      html += '<'+tag+' style="border:1px solid '+t.tableBorderColor+';padding:8px 12px;text-align:'+align+';background:'+bg+';color:'+cellColor+';line-height:'+lh+';'+fw+'">'+inlineFormat(rows[r][c],t,tc,links)+'</'+tag+'>';
     }
     html += '</tr>';
   }
@@ -537,7 +566,7 @@ editor.addEventListener('input', scheduleRender);
 themeSelect.addEventListener('change', function(){
   state.theme = this.value;
   // update themeColor to match theme
-  var defaults = {minimal:'#1890ff', tech:'#1890ff', literary:'#8d6e63'};
+  var defaults = {minimal:'#1890ff', tech:'#1890ff', literary:'#8d6e63', acg:'#e91e90', business:'#1a237e'};
   state.themeColor = defaults[state.theme] || '#1890ff';
   themeColorInput.value = state.themeColor;
   render();
