@@ -7,98 +7,100 @@
 <style>
 /* ===== Reset & Base ===== */
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;font-size:14px;color:#24292f;background:#f0f2f5}
+html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;font-size:14px;color:#24292f;background:#f8f9fa}
 
-/* ===== Custom Scrollbar §8.4 ===== */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#d0d0d0;border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:#aaa}
+/* ===== Design System §8.1 ===== */
+/* 8px grid: 4/8/12/16/24/32/48 */
+/* Type scale: Display 16/600/#1a1a2e, Body 14/400/#24292f, Caption 12/400/#8b949e, Label 13/500/#57606a */
+/* Colors: Primary #2563eb, Hover #1d4ed8, Surface #fff, BG #f8f9fa, Editor #fafbfc, Border #e5e7eb */
+/* Radius: 8px uniform. Shadows: sm/md/focus. Transition: all 150ms ease */
 
 /* ===== Layout ===== */
 .app{display:flex;flex-direction:column;height:100vh;min-width:1024px}
 
-/* §8.2 Toolbar */
-.toolbar{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 24px;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 1px 8px rgba(0,0,0,0.06);flex-shrink:0;position:sticky;top:0;z-index:10}
-.toolbar-left{display:flex;align-items:center;gap:20px}
-.toolbar-right{display:flex;align-items:center;gap:12px}
+/* §8.2 Toolbar — clean white bar */
+.toolbar{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 24px;background:#ffffff;border-bottom:1px solid #e5e7eb;flex-shrink:0}
+.toolbar-left{display:flex;align-items:center;gap:24px}
+.toolbar-right{display:flex;align-items:center;gap:8px}
 
-/* Brand §8.2 */
-.brand{display:flex;align-items:center;gap:10px}
-.brand-icon{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0}
-.brand-text{font-size:15px;font-weight:600;color:#1a1a2e;white-space:nowrap}
+/* Brand — text only, no icon */
+.brand-text{font-size:16px;font-weight:600;color:#1a1a2e;white-space:nowrap}
 
-/* §8.3 Theme Cards */
-.theme-selector{display:flex;align-items:center;gap:10px}
-.theme-label{font-size:13px;color:#999}
-.theme-cards{display:flex;gap:8px;align-items:center}
-.theme-card{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 200ms ease;position:relative;flex-shrink:0}
-.theme-card:hover{width:32px;height:32px;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
-.theme-card.active{border-color:currentColor;box-shadow:0 0 0 2px rgba(0,0,0,0.08)}
-.theme-card-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:11px;padding:3px 10px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 200ms}
-.theme-card-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#333}
-.theme-card:hover .theme-card-tip{opacity:1}
+/* §8.3 Custom Dropdown Theme Selector */
+.theme-dropdown{position:relative}
+.theme-dropdown-trigger{display:flex;align-items:center;gap:8px;padding:6px 12px;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;transition:all 150ms ease;user-select:none}
+.theme-dropdown-trigger:hover{border-color:#d1d5db;background:#f9fafb}
+.theme-dropdown-trigger .current-name{font-size:13px;font-weight:500;color:#24292f}
+.theme-dropdown-trigger .chevron{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #8b949e;transition:transform 150ms ease}
+.theme-dropdown.open .chevron{transform:rotate(180deg)}
+.theme-dropdown-menu{position:absolute;top:calc(100% + 4px);left:0;min-width:240px;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);z-index:50;display:none;overflow:hidden}
+.theme-dropdown.open .theme-dropdown-menu{display:block}
+.theme-option{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;transition:background 150ms ease;font-size:13px;color:#24292f}
+.theme-option:hover{background:#f3f4f6}
+.theme-option.active{color:#2563eb}
+.theme-option .check{width:16px;font-size:13px;flex-shrink:0;text-align:center}
+.theme-option .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.theme-option .theme-info{display:flex;flex-direction:column;gap:1px}
+.theme-option .theme-name{font-weight:500;font-size:13px}
+.theme-option .theme-desc{font-size:12px;color:#8b949e}
+.theme-option.active .theme-desc{color:#93b4f5}
 
-.main{display:flex;flex:1;overflow:hidden;position:relative}
+/* Main area */
+.main{display:flex;flex:1;overflow:hidden}
 
 /* §8.4 Editor */
-.editor-pane{flex:1;display:flex;flex-direction:column;background:#fafbfc;min-width:30%}
-.editor-pane textarea{flex:1;border:none;outline:none;resize:none;padding:24px;font-family:'JetBrains Mono',Menlo,Consolas,'Courier New',monospace;font-size:14px;line-height:1.6;color:#24292f;background:#fafbfc;tab-size:4;caret-color:#1890ff}
-.editor-pane textarea::placeholder{color:#bbb;font-style:italic}
+.editor-pane{flex:1;display:flex;flex-direction:column;background:#fafbfc;min-width:0}
+.editor-pane textarea{flex:1;border:none;outline:none;resize:none;padding:24px;font-family:Menlo,Consolas,'Courier New',monospace;font-size:14px;line-height:1.6;color:#24292f;background:#fafbfc;tab-size:4;caret-color:#2563eb}
+.editor-pane textarea::placeholder{color:#c9cdd4;font-style:normal}
+.editor-pane textarea:focus{outline:none}
 
-/* §8.6 Resize Handle */
-.resize-handle{width:5px;cursor:col-resize;background:#e8e8e8;transition:background 200ms;flex-shrink:0;position:relative}
-.resize-handle::before{content:'';position:absolute;top:0;bottom:0;left:-5px;right:-5px}
-.resize-handle:hover,.resize-handle.dragging{background:#1890ff}
+/* §8.6 Divider — 1px static line */
+.divider{width:1px;background:#e5e7eb;flex-shrink:0}
 
 /* §8.5 Preview */
-.preview-pane{flex:1;display:flex;flex-direction:column;background:#f0f2f5;overflow-y:auto;padding:24px;min-width:30%}
-.preview-wrapper{max-width:680px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);width:100%;overflow:hidden}
-.preview-content{padding:36px 32px}
+.preview-pane{flex:1;display:flex;flex-direction:column;background:#f8f9fa;overflow-y:auto;padding:24px;min-width:0}
+.preview-wrapper{max-width:680px;margin:0 auto;background:#ffffff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);width:100%}
+.preview-content{padding:32px}
 
-/* §8.5.1 WeChat Shell */
-.wechat-header{padding:20px 32px 16px;border-bottom:1px solid #f0f0f0}
-.wechat-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:#999}
-.wechat-meta .author-name{font-size:14px;color:#576b95;font-weight:500}
-.wechat-meta .pub-date{font-size:12px;color:#999}
-.wechat-footer{padding:16px 32px 20px;border-top:1px solid #f0f0f0;font-size:12px;color:#999;display:flex;gap:16px;justify-content:flex-end}
-
-/* §8.9 Status Bar */
-.statusbar{display:flex;align-items:center;justify-content:space-between;height:28px;padding:0 20px;background:#fafbfc;border-top:1px solid #e8e8e8;font-size:12px;color:#999;flex-shrink:0}
+/* §8.10 Status Bar */
+.statusbar{display:flex;align-items:center;justify-content:space-between;height:32px;padding:0 24px;background:#ffffff;border-top:1px solid #e5e7eb;font-size:12px;color:#8b949e;flex-shrink:0}
 
 /* ===== Toolbar Controls ===== */
-.btn{border:none;border-radius:4px;font-size:13px;cursor:pointer;transition:all 150ms ease}
-.btn-icon{background:none;border:1px solid #d9d9d9;border-radius:4px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#666;transition:all 150ms ease}
-.btn-icon:hover{border-color:#667eea;color:#667eea}
-.btn-icon.active{border-color:#667eea;color:#667eea;background:rgba(102,126,234,0.08)}
+
+/* §8.7 Settings Button */
+.btn-settings{background:none;border:1px solid #e5e7eb;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#8b949e;transition:all 150ms ease}
+.btn-settings:hover{color:#57606a;border-color:#d1d5db;background:#f9fafb}
+.btn-settings.active{color:#2563eb;border-color:#2563eb;background:rgba(37,99,235,0.05)}
 
 /* §8.8 Copy Button */
-.btn-copy{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:all 200ms ease;position:relative;overflow:hidden}
-.btn-copy:hover{filter:brightness(1.1);box-shadow:0 2px 8px rgba(102,126,234,0.4)}
-.btn-copy:active{transform:scale(0.95)}
-.btn-copy.success{background:#52c41a;animation:copyPop 200ms ease}
-.btn-copy.fail{background:#ff4d4f}
-@keyframes copyPop{0%{transform:scale(0.95)}100%{transform:scale(1)}}
+.btn-copy{background:#2563eb;color:#ffffff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:all 150ms ease}
+.btn-copy:hover{background:#1d4ed8}
+.btn-copy:active{transform:scale(0.98)}
+.btn-copy.success{background:#16a34a}
+.btn-copy.fail{background:#dc2626}
 
-/* ===== Settings Panel §8.7 ===== */
-.settings-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.15);z-index:100;display:none}
+/* §8.9 Settings Panel */
+.settings-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.1);z-index:100;display:none}
 .settings-overlay.show{display:block}
-.settings-panel{position:fixed;top:0;right:0;width:300px;height:100%;background:#fff;z-index:101;box-shadow:-2px 0 8px rgba(0,0,0,.1);transform:translateX(100%);transition:transform 250ms ease;display:flex;flex-direction:column}
+.settings-panel{position:fixed;top:0;right:0;width:300px;height:100%;background:#ffffff;z-index:101;box-shadow:-4px 0 16px rgba(0,0,0,0.08);border-radius:8px 0 0 8px;transform:translateX(100%);transition:transform 200ms ease;display:flex;flex-direction:column}
 .settings-panel.show{transform:translateX(0)}
-.settings-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e8e8e8}
-.settings-header h3{font-size:15px;font-weight:600}
-.settings-close{background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:0;line-height:1}
-.settings-close:hover{color:#333}
-.settings-body{padding:20px;overflow-y:auto;flex:1}
-.setting-item{margin-bottom:20px}
-.setting-item label{display:block;font-size:13px;color:#666;margin-bottom:8px}
+.settings-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #e5e7eb}
+.settings-header h3{font-size:15px;font-weight:600;color:#1a1a2e}
+.settings-close{background:none;border:none;font-size:20px;cursor:pointer;color:#8b949e;padding:0;line-height:1;transition:color 150ms ease}
+.settings-close:hover{color:#24292f}
+.settings-body{padding:24px;overflow-y:auto;flex:1}
+.setting-item{margin-bottom:24px}
+.setting-item label{display:block;font-size:13px;font-weight:500;color:#57606a;margin-bottom:8px}
 .setting-item .range-row{display:flex;align-items:center;gap:8px}
-.setting-item input[type=range]{flex:1;accent-color:#667eea}
-.setting-item .range-val{font-size:12px;color:#999;min-width:40px;text-align:right}
-.setting-item input[type=color]{width:40px;height:30px;border:1px solid #d9d9d9;border-radius:4px;cursor:pointer;padding:2px}
+.setting-item input[type=range]{flex:1;accent-color:#2563eb}
+.setting-item .range-val{font-size:12px;color:#8b949e;min-width:40px;text-align:right}
+.setting-item input[type=color]{width:40px;height:32px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;padding:2px}
+.setting-item select{width:100%;padding:6px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#24292f;background:#ffffff;transition:all 150ms ease;outline:none}
+.setting-item select:hover{border-color:#d1d5db}
+.setting-item select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.15)}
 
-/* ===== Toast §8.12 ===== */
-.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);background:#333;color:#fff;padding:8px 24px;border-radius:6px;font-size:13px;opacity:0;transition:all 300ms ease;pointer-events:none;z-index:200}
+/* ===== Toast ===== */
+.toast{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-16px);background:#24292f;color:#ffffff;padding:8px 24px;border-radius:8px;font-size:13px;opacity:0;transition:all 150ms ease;pointer-events:none;z-index:200}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
@@ -107,54 +109,44 @@ html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",
   <!-- Toolbar §8.2 -->
   <div class="toolbar">
     <div class="toolbar-left">
-      <div class="brand">
-        <div class="brand-icon">M</div>
-        <span class="brand-text">Markdown 美化器</span>
-      </div>
-      <div class="theme-selector">
-        <span class="theme-label">主题</span>
-        <div class="theme-cards" id="themeCards"></div>
+      <span class="brand-text">Markdown 美化器</span>
+      <!-- §8.3 Custom Dropdown -->
+      <div class="theme-dropdown" id="themeDropdown">
+        <div class="theme-dropdown-trigger" id="themeTrigger">
+          <span class="current-name" id="currentThemeName">简约</span>
+          <span class="chevron"></span>
+        </div>
+        <div class="theme-dropdown-menu" id="themeMenu"></div>
       </div>
     </div>
     <div class="toolbar-right">
-      <button class="btn-icon" id="settingsBtn" title="样式微调">⚙</button>
-      <button class="btn-copy" id="copyBtn">📋 复制</button>
+      <button class="btn-settings" id="settingsBtn" title="样式微调">⚙</button>
+      <button class="btn-copy" id="copyBtn">复制</button>
     </div>
   </div>
 
   <!-- Main -->
   <div class="main" id="mainArea">
     <div class="editor-pane" id="editorPane">
-      <textarea id="editor" spellcheck="false" placeholder="在这里粘贴或编写你的 Markdown 文章..."></textarea>
+      <textarea id="editor" spellcheck="false" placeholder="在这里输入 Markdown..."></textarea>
     </div>
-    <div class="resize-handle" id="resizeHandle"></div>
+    <div class="divider"></div>
     <div class="preview-pane" id="previewPane">
       <div class="preview-wrapper">
-        <div class="wechat-header">
-          <div class="wechat-meta">
-            <span class="author-name">我的公众号</span>
-            <span class="pub-date" id="wechatDate"></span>
-          </div>
-        </div>
         <div class="preview-content" id="preview"></div>
-        <div class="wechat-footer">
-          <span>❤️ 喜欢</span>
-          <span>👀 在看</span>
-          <span>⭐ 收藏</span>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- Status Bar -->
+  <!-- Status Bar §8.10 -->
   <div class="statusbar">
     <span id="charCount">0 字</span>
-    <span id="themeName">主题：简约</span>
-    <span id="storageStatus">存储：就绪</span>
+    <span id="themeName">简约</span>
+    <span id="storageStatus">已保存</span>
   </div>
 </div>
 
-<!-- Settings Panel -->
+<!-- Settings Panel §8.9 -->
 <div class="settings-overlay" id="settingsOverlay"></div>
 <div class="settings-panel" id="settingsPanel">
   <div class="settings-header">
@@ -178,11 +170,11 @@ html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",
     </div>
     <div class="setting-item">
       <label>主题色</label>
-      <input type="color" id="themeColor" value="#1890ff">
+      <input type="color" id="themeColor" value="#2563eb">
     </div>
     <div class="setting-item">
       <label>代码块配色</label>
-      <select id="codeTheme" style="width:100%;padding:6px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px">
+      <select id="codeTheme">
         <option value="light">浅色</option>
         <option value="dark">深色</option>
         <option value="monokai">Monokai</option>
@@ -215,18 +207,13 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 function highlightCode(code, lang){
   lang = (lang||'').toLowerCase().replace(/^javascript$/,'js').replace(/^py$/,'python');
   var h = escHtml(code);
-
-  // strings
   h = h.replace(/(["'`])(?:(?!\1|\\).|\\.)*?\1/g, function(m){return '<span style="color:#e6db74">'+m+'</span>'});
-  // comments
   h = h.replace(/(\/\/.*$)/gm, function(m){return '<span style="color:#75715e">'+m+'</span>'});
   h = h.replace(/(#[^\n<]*)/g, function(m){
     if(lang==='css') return m;
     return '<span style="color:#75715e">'+m+'</span>';
   });
-  // numbers
   h = h.replace(/\b(\d+\.?\d*)\b/g, '<span style="color:#ae81ff">$1</span>');
-  // keywords
   var kw = HL_KEYWORDS[lang];
   if(kw){
     h = h.replace(kw, function(m){return '<span style="color:#f92672;font-weight:bold">'+m+'</span>'});
@@ -237,7 +224,7 @@ function highlightCode(code, lang){
 // ----- Themes -----
 var THEMES = {
   minimal: {
-    name:'简约',
+    name:'简约', desc:'黑白灰，干净清爽', dot:'#333333',
     h1Color:'#000', h2Color:'#333', h3Color:'#555',
     textColor:'#333', linkColor:'#576b95',
     quoteBg:'#f7f7f7', quoteBorder:'#ddd', quoteColor:'#666',
@@ -246,7 +233,7 @@ var THEMES = {
     hrColor:'#eee'
   },
   tech: {
-    name:'科技',
+    name:'科技', desc:'蓝色系，技术范儿', dot:'#1890ff',
     h1Color:'#0d47a1', h2Color:'#1565c0', h3Color:'#1976d2',
     textColor:'#37474f', linkColor:'#1890ff',
     quoteBg:'#e3f2fd', quoteBorder:'#1890ff', quoteColor:'#37474f',
@@ -255,7 +242,7 @@ var THEMES = {
     hrColor:'#b0bec5'
   },
   literary: {
-    name:'文艺',
+    name:'文艺', desc:'暖色调，温馨优雅', dot:'#8d6e63',
     h1Color:'#5d4037', h2Color:'#6d4c41', h3Color:'#795548',
     textColor:'#4e342e', linkColor:'#8d6e63',
     quoteBg:'#fbe9e7', quoteBorder:'#d7ccc8', quoteColor:'#5d4037',
@@ -264,7 +251,7 @@ var THEMES = {
     hrColor:'#d7ccc8'
   },
   acg: {
-    name:'二次元',
+    name:'二次元', desc:'粉紫渐变，活泼可爱', dot:'#e91e90',
     h1Color:'#e91e90', h2Color:'#9c27b0', h3Color:'#7c4dff',
     textColor:'#424242', linkColor:'#e91e90',
     quoteBg:'#fce4ec', quoteBorder:'#e91e90', quoteColor:'#6a1b9a',
@@ -274,7 +261,7 @@ var THEMES = {
     h1Deco:'gradient', headingFont:null
   },
   business: {
-    name:'商务',
+    name:'商务', desc:'深蓝金色，严谨专业', dot:'#1a237e',
     h1Color:'#1a237e', h2Color:'#283593', h3Color:'#303f9f',
     textColor:'#37474f', linkColor:'#1a237e',
     quoteBg:'#e8eaf6', quoteBorder:'#c5a842', quoteColor:'#1a237e',
@@ -284,6 +271,9 @@ var THEMES = {
     h1Deco:null, headingFont:"'Georgia','Noto Serif SC',serif"
   }
 };
+
+// Theme default colors for themeColor picker
+var THEME_DEFAULTS = {minimal:'#333333',tech:'#1890ff',literary:'#8d6e63',acg:'#e91e90',business:'#1a237e'};
 
 // ----- Code block themes -----
 var CODE_THEMES = {
@@ -297,7 +287,7 @@ var state = {
   theme:'minimal',
   fontSize:16,
   lineHeight:1.75,
-  themeColor:'#1890ff',
+  themeColor:'#333333',
   codeTheme:'light',
   content:''
 };
@@ -318,12 +308,11 @@ try {
 // ----- Sample Article -----
 var SAMPLE = '# 公众号 Markdown 美化器\n\n> 一键将 Markdown 转为公众号排版，复制粘贴即用。\n\n## 功能特性\n\n这是一个**纯前端**工具，支持以下 Markdown 语法：\n\n### 文本样式\n\n- **加粗文本**\n- *斜体文本*\n- ~~删除线文本~~\n- `行内代码` 也支持\n\n### 列表\n\n**无序列表：**\n\n- 第一项\n- 第二项\n- 第三项\n\n**有序列表：**\n\n1. 安装环境\n2. 编写代码\n3. 测试部署\n\n### 代码块\n\n```javascript\nfunction greet(name) {\n  const msg = `Hello, ${name}!`;\n  console.log(msg);\n  return msg;\n}\n\ngreet("World");\n```\n\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n - 1) + fibonacci(n - 2)\n\nfor i in range(10):\n    print(fibonacci(i))\n```\n\n### 引用\n\n> 代码是写给人看的，附带能在机器上运行。\n> — Harold Abelson\n\n### 表格\n\n| 工具 | 语言 | 特点 |\n|------|------|------|\n| FFmpeg | C | 音视频处理的瑞士军刀 |\n| QEMU | C | 全系统模拟器 |\n| TCC | C | 最快的 C 编译器 |\n| QuickJS | C | 极简 JS 引擎 |\n\n### 链接\n\n推荐阅读 [Markdown 指南](https://www.markdownguide.org)，也可以参考 [GitHub 文档](https://docs.github.com)。\n\n### 图片\n\n![示例图片](https://via.placeholder.com/600x200/e3f2fd/1890ff?text=公众号+Markdown+美化器)\n\n### 分隔线\n\n---\n\n### 多级标题\n\n#### 四级标题\n\n##### 五级标题\n\n###### 六级标题\n\n感谢使用！🎉\n';
 
-  if(!state.content) state.content = SAMPLE;
+if(!state.content) state.content = SAMPLE;
 
 // ----- DOM -----
 var editor = document.getElementById('editor');
 var preview = document.getElementById('preview');
-var themeCardsEl = document.getElementById('themeCards');
 var copyBtn = document.getElementById('copyBtn');
 var settingsBtn = document.getElementById('settingsBtn');
 var settingsPanel = document.getElementById('settingsPanel');
@@ -339,45 +328,54 @@ var charCountEl = document.getElementById('charCount');
 var themeNameEl = document.getElementById('themeName');
 var storageEl = document.getElementById('storageStatus');
 var toastEl = document.getElementById('toast');
-var wechatDateEl = document.getElementById('wechatDate');
-var resizeHandle = document.getElementById('resizeHandle');
-var editorPane = document.getElementById('editorPane');
-var mainArea = document.getElementById('mainArea');
+var themeDropdown = document.getElementById('themeDropdown');
+var themeTrigger = document.getElementById('themeTrigger');
+var themeMenu = document.getElementById('themeMenu');
+var currentThemeNameEl = document.getElementById('currentThemeName');
 
-// §8.3 Theme card colors
-var THEME_CARD_COLORS = {minimal:'#333',tech:'#1890ff',literary:'#8d6e63',acg:'#e91e90',business:'#1a237e'};
-
-// Build theme cards
-function buildThemeCards(){
-  themeCardsEl.innerHTML='';
+// ----- §8.3 Build Theme Dropdown -----
+function buildThemeMenu(){
+  themeMenu.innerHTML = '';
   Object.keys(THEMES).forEach(function(key){
-    var c = document.createElement('div');
-    c.className='theme-card'+(key===state.theme?' active':'');
-    c.style.background=THEME_CARD_COLORS[key]||'#999';
-    c.style.color=THEME_CARD_COLORS[key]||'#999';
-    c.innerHTML='<span class="theme-card-tip">'+THEMES[key].name+'</span>';
-    c.addEventListener('click',function(){
-      state.theme=key;
-      var defaults={minimal:'#1890ff',tech:'#1890ff',literary:'#8d6e63',acg:'#e91e90',business:'#1a237e'};
-      state.themeColor=defaults[key]||'#1890ff';
-      themeColorInput.value=state.themeColor;
-      editor.style.caretColor=state.themeColor;
-      buildThemeCards();
+    var t = THEMES[key];
+    var opt = document.createElement('div');
+    opt.className = 'theme-option' + (key === state.theme ? ' active' : '');
+    opt.innerHTML = '<span class="check">' + (key === state.theme ? '✓' : '') + '</span>' +
+      '<span class="dot" style="background:' + t.dot + '"></span>' +
+      '<span class="theme-info"><span class="theme-name">' + t.name + '</span>' +
+      '<span class="theme-desc">' + t.desc + '</span></span>';
+    opt.addEventListener('click', function(){
+      state.theme = key;
+      state.themeColor = THEME_DEFAULTS[key] || '#333333';
+      themeColorInput.value = state.themeColor;
+      buildThemeMenu();
+      currentThemeNameEl.textContent = t.name;
+      themeDropdown.classList.remove('open');
       render();
     });
-    themeCardsEl.appendChild(c);
+    themeMenu.appendChild(opt);
   });
 }
 
-// Set WeChat date §8.5.1
-(function(){var d=new Date();wechatDateEl.textContent=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
+// Toggle dropdown
+themeTrigger.addEventListener('click', function(e){
+  e.stopPropagation();
+  themeDropdown.classList.toggle('open');
+});
+
+// Close dropdown on outside click
+document.addEventListener('click', function(e){
+  if(!themeDropdown.contains(e.target)){
+    themeDropdown.classList.remove('open');
+  }
+});
 
 // ----- Init UI -----
 editor.value = state.content;
-editor.style.caretColor = state.themeColor;
-buildThemeCards();
+currentThemeNameEl.textContent = THEMES[state.theme].name;
+buildThemeMenu();
 fontSizeInput.value = state.fontSize;
-fontSizeVal.textContent = state.fontSize+'px';
+fontSizeVal.textContent = state.fontSize + 'px';
 lineHeightInput.value = state.lineHeight;
 lineHeightVal.textContent = state.lineHeight;
 themeColorInput.value = state.themeColor;
@@ -386,9 +384,7 @@ codeThemeSelect.value = state.codeTheme;
 // ----- Markdown Parser -----
 function parseMD(src){
   var links = [];
-  var linkIdx = 0;
 
-  // Normalize line endings
   src = src.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
   var t = getTheme();
@@ -397,7 +393,6 @@ function parseMD(src){
   var lh = state.lineHeight;
   var tc = state.themeColor;
 
-  // Split into blocks
   var lines = src.split('\n');
   var html = '';
   var i = 0;
@@ -405,7 +400,6 @@ function parseMD(src){
   while(i < lines.length){
     var line = lines[i];
 
-    // Empty line
     if(line.trim() === ''){
       i++;
       continue;
@@ -421,7 +415,7 @@ function parseMD(src){
         codeLines.push(lines[i]);
         i++;
       }
-      i++; // skip closing ```
+      i++;
       var code = codeLines.join('\n');
       var hl = highlightCode(code, lang);
       html += '<pre style="background:'+ct.bg+';color:'+ct.color+';border:1px solid '+ct.border+';border-radius:4px;padding:16px;overflow-x:auto;font-family:Menlo,Consolas,\'Courier New\',monospace;font-size:13px;line-height:1.5;margin:16px 0;white-space:pre;word-wrap:normal"><code>'+hl+'</code></pre>';
@@ -458,9 +452,8 @@ function parseMD(src){
     // Table
     if(line.indexOf('|') >= 0 && i+1 < lines.length && lines[i+1].match(/^\|?\s*[-:]+[-| :]*$/)){
       var tableRows = [];
-      // header
       tableRows.push(parseTableRow(line));
-      i++; // separator
+      i++;
       var aligns = parseTableAlign(lines[i]);
       i++;
       while(i < lines.length && lines[i].indexOf('|') >= 0 && lines[i].trim() !== ''){
@@ -529,9 +522,9 @@ function parseMD(src){
   // Footnotes for links
   if(links.length > 0){
     html += '<section style="margin-top:32px;padding-top:16px;border-top:1px solid '+t.hrColor+'">';
-    html += '<p style="font-size:12px;color:#999;margin-bottom:8px">参考链接</p>';
+    html += '<p style="font-size:12px;color:#8b949e;margin-bottom:8px">参考链接</p>';
     for(var fi=0; fi<links.length; fi++){
-      html += '<p style="font-size:12px;color:#999;margin:2px 0;word-break:break-all">['+links[fi].idx+'] '+links[fi].text+'：'+escHtml(links[fi].url)+'</p>';
+      html += '<p style="font-size:12px;color:#8b949e;margin:2px 0;word-break:break-all">['+links[fi].idx+'] '+links[fi].text+'：'+escHtml(links[fi].url)+'</p>';
     }
     html += '</section>';
   }
@@ -540,45 +533,41 @@ function parseMD(src){
 }
 
 function inlineFormat(text, t, tc, links){
-  // Escape HTML first (but preserve already-processed HTML tags from <br>)
   text = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // Restore <br>
   text = text.replace(/&lt;br&gt;/g, '<br>');
 
-  // Images ![alt](url)
+  // Images
   text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(m, alt, url){
     return '<img src="'+url+'" alt="'+alt+'" style="display:block;max-width:100%;margin:12px auto;border-radius:4px">';
   });
 
-  // Links [text](url) → footnote
+  // Links → footnote
   text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(m, lt, url){
     links.push({idx: links.length+1, text: lt, url: url});
     return '<span style="color:'+tc+';font-weight:500">'+lt+'</span><sup style="color:'+tc+';font-size:10px;margin-left:1px">['+links.length+']</sup>';
   });
 
-  // Bold + Italic ***text*** or ___text___
+  // Bold + Italic
   text = text.replace(/\*{3}(.+?)\*{3}/g, '<strong style="font-weight:bold"><em style="font-style:italic">$1</em></strong>');
   text = text.replace(/_{3}(.+?)_{3}/g, '<strong style="font-weight:bold"><em style="font-style:italic">$1</em></strong>');
 
-  // Bold **text** or __text__
+  // Bold
   text = text.replace(/\*{2}(.+?)\*{2}/g, '<strong style="font-weight:bold">$1</strong>');
   text = text.replace(/_{2}(.+?)_{2}/g, '<strong style="font-weight:bold">$1</strong>');
 
-  // Italic *text* or _text_
+  // Italic
   text = text.replace(/\*(.+?)\*/g, '<em style="font-style:italic">$1</em>');
   text = text.replace(/_(.+?)_/g, '<em style="font-style:italic">$1</em>');
 
-  // Strikethrough ~~text~~
+  // Strikethrough
   text = text.replace(/~~(.+?)~~/g, '<del style="text-decoration:line-through;color:#999">$1</del>');
 
-  // Inline code `code`
+  // Inline code
   text = text.replace(/`([^`]+)`/g, function(m, c){
     return '<code style="background:'+(t.codeBg||'#f6f8fa')+';color:'+(t.codeColor||'#333')+';padding:2px 6px;border-radius:3px;font-family:Menlo,Consolas,\'Courier New\',monospace;font-size:0.9em">'+c+'</code>';
   });
 
-  // Line breaks
   text = text.replace(/\n/g, '<br>');
-
   return text;
 }
 
@@ -636,23 +625,21 @@ function render(){
   state.content = md;
   preview.innerHTML = parseMD(md);
   charCountEl.textContent = md.length + ' 字';
-  themeNameEl.textContent = '主题：' + (THEMES[state.theme]||THEMES.minimal).name;
+  themeNameEl.textContent = (THEMES[state.theme]||THEMES.minimal).name;
   saveState();
 }
 
 function saveState(){
   try{
     localStorage.setItem('m2w_state', JSON.stringify(state));
-    storageEl.textContent = '存储：已保存';
+    storageEl.textContent = '已保存';
   }catch(e){
-    storageEl.textContent = '存储：空间不足';
+    storageEl.textContent = '空间不足';
   }
 }
 
 // ----- Events -----
 editor.addEventListener('input', scheduleRender);
-
-// Theme switching handled by theme card click handlers
 
 fontSizeInput.addEventListener('input', function(){
   state.fontSize = parseInt(this.value);
@@ -696,19 +683,18 @@ copyBtn.addEventListener('click', function(){
   if(!content){showToast('没有可复制的内容');return}
 
   function onCopySuccess(){
-    showToast('复制成功 ✅');
-    copyBtn.textContent='✅ 已复制';
+    showToast('复制成功');
+    copyBtn.textContent='已复制 ✓';
     copyBtn.classList.add('success');
-    setTimeout(function(){copyBtn.textContent='📋 复制';copyBtn.classList.remove('success')},1500);
+    setTimeout(function(){copyBtn.textContent='复制';copyBtn.classList.remove('success')},1500);
   }
   function onCopyFail(){
     showToast('请手动 Ctrl+C / Cmd+C 复制');
-    copyBtn.textContent='❌ 失败';
+    copyBtn.textContent='复制失败';
     copyBtn.classList.add('fail');
-    setTimeout(function(){copyBtn.textContent='📋 复制';copyBtn.classList.remove('fail')},1500);
+    setTimeout(function(){copyBtn.textContent='复制';copyBtn.classList.remove('fail')},1500);
   }
 
-  // Try Clipboard API with HTML
   if(navigator.clipboard && window.ClipboardItem){
     var blob = new Blob([content], {type:'text/html'});
     var item = new ClipboardItem({'text/html': blob, 'text/plain': new Blob([editor.value], {type:'text/plain'})});
@@ -733,32 +719,6 @@ function showToast(msg){
   toastEl.classList.add('show');
   setTimeout(function(){toastEl.classList.remove('show')},2000);
 }
-
-// §8.6 Resize Handle
-(function(){
-  var dragging=false;
-  resizeHandle.addEventListener('mousedown',function(e){
-    e.preventDefault();dragging=true;
-    resizeHandle.classList.add('dragging');
-    document.body.style.cursor='col-resize';
-    document.body.style.userSelect='none';
-  });
-  document.addEventListener('mousemove',function(e){
-    if(!dragging)return;
-    var rect=mainArea.getBoundingClientRect();
-    var pct=((e.clientX-rect.left)/rect.width)*100;
-    pct=Math.max(30,Math.min(70,pct));
-    editorPane.style.flex='none';
-    editorPane.style.width=pct+'%';
-  });
-  document.addEventListener('mouseup',function(){
-    if(!dragging)return;
-    dragging=false;
-    resizeHandle.classList.remove('dragging');
-    document.body.style.cursor='';
-    document.body.style.userSelect='';
-  });
-})();
 
 // ----- Init Render -----
 render();
